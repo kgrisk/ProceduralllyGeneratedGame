@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour {
-	private static PlayerMovement instance;
-	public GameObject bullet;
-	public Transform bulletPos;
+public delegate void DeadEventHandler();
 
+public class PlayerMovement : Character {
+	private static PlayerMovement instance;
+
+	public event DeadEventHandler Died;
 	public static PlayerMovement Instance{
 		get{ 
 			if (instance == null) {
@@ -15,9 +16,12 @@ public class PlayerMovement : MonoBehaviour {
 			return instance;
 		}
 	}
-	public float speed;
-	private bool facingRight = true;
-	private Animator anim;
+
+
+	private bool immortal = false;
+	private float immortalTime = 3f;
+
+	private SpriteRenderer spriteR;
 
 	public Transform [] groundPoints;
 	public LayerMask groundOverlapMasks;
@@ -26,28 +30,34 @@ public class PlayerMovement : MonoBehaviour {
 	public float jumpForce;
 
 	public Rigidbody2D Rgb{ get; set;}
-	public bool Attack{ get; set;}
+
 	public bool Jump{ get; set;}
 	public bool OnGround{ get; set;}
 	// Use this for initialization
-	void Start () {
+	public override void Start () {
+		base.Start ();
 		Rgb = GetComponent<Rigidbody2D> ();
-		anim = GetComponent<Animator> ();
+		spriteR = GetComponent<SpriteRenderer> ();
+
 	}
 
 	void Update(){
-		HandleInput ();
+		if(!TakingDemage && !IsDead){
+			HandleInput ();
+		}
 	}
 
 	// Update is called once per frame
 	void FixedUpdate () {
-		float horizontalMovement = Input.GetAxis ("Horizontal");
-		OnGround = IsGrounded ();
-		PlayerMovements (horizontalMovement);
-		Flip (horizontalMovement);
+		if (!TakingDemage && !IsDead) {
+			float horizontalMovement = Input.GetAxis ("Horizontal");
+			OnGround = IsGrounded ();
+			PlayerMovements (horizontalMovement);
+			Flip (horizontalMovement);
 
-		LayersHandling ();
+			LayersHandling ();
 
+		}
 	}
 
 	private bool IsGrounded(){
@@ -64,7 +74,7 @@ public class PlayerMovement : MonoBehaviour {
 	}
 	private void PlayerMovements(float horizontal){
 		if (Rgb.velocity.y < 0) {
-			anim.SetBool ("land",true);
+			Anim.SetBool ("land",true);
 		}
 		if (!Attack) {
 			Rgb.velocity = new Vector2 (horizontal * speed, Rgb.velocity.y);
@@ -72,20 +82,20 @@ public class PlayerMovement : MonoBehaviour {
 		if (Jump && Rgb.velocity.y == 0) {
 			Rgb.AddForce (new Vector2 (0,jumpForce));
 		}
-		anim.SetFloat ("speed", Mathf.Abs(horizontal));
+		Anim.SetFloat ("speed", Mathf.Abs(horizontal));
 			
 
 	}
 
 	private void HandleInput(){
 		if (Input.GetKeyDown (KeyCode.E)) {
-			anim.SetTrigger ("attack");
+			Anim.SetTrigger ("attack");
 		}
 		if (Input.GetKeyDown (KeyCode.Space)) {
-			anim.SetTrigger ("jump");
+			Anim.SetTrigger ("jump");
 		}
 		if (Input.GetKey (KeyCode.Q)) {
-			anim.SetTrigger ("shoot");
+			Anim.SetTrigger ("shoot");
 		}
 	}
 
@@ -93,33 +103,82 @@ public class PlayerMovement : MonoBehaviour {
 
 	private void Flip(float horizontal){
 		if (horizontal > 0 && !facingRight || horizontal < 0 && facingRight) {
-			facingRight = !facingRight;
-			transform.localScale = new Vector3 (transform.localScale.x * -1, transform.localScale.y, transform.localScale.z);
-
+			DirectionChange ();
 		}
 	}
 	private void LayersHandling(){
 		if (!OnGround) {
-			anim.SetLayerWeight (1, 1);
+			Anim.SetLayerWeight (1, 1);
 		} else {
-			anim.SetLayerWeight (1, 0);
+			Anim.SetLayerWeight (1, 0);
 		}
 		}
-	public void ShootBullet(int value){
+	public override void ShootBullet(int value){
 		if ((!OnGround && value == 1) || (OnGround && value == 0)) {
-			if (facingRight) {
-				GameObject obj = (GameObject)Instantiate (bullet, bulletPos.position, Quaternion.Euler (new Vector3(0,0,-90)));
-				obj.GetComponent<Bullet> ().Initalize (Vector2.right);
-			} else {
-
-				GameObject obj =(GameObject) Instantiate (bullet, bulletPos.position, Quaternion.Euler(new Vector3(0,0,90)));
-				obj.GetComponent<Bullet> ().Initalize (Vector2.left);
-			}
+			base.ShootBullet (value);
 		}
 	}
 
-	
+	private IEnumerator IndicateImmortality(){
 
+		while (immortal) {
+			spriteR.enabled = false;
+			yield return new WaitForSeconds (0.1f);
+			spriteR.enabled = true;
+			yield return new WaitForSeconds (0.1f);
+		}
+	}
+
+	#region implemented abstract members of Character
+	public override IEnumerator TakeDemage ()
+	{
+		
+		if (!immortal) {
+			health -= 10;
+			if (!IsDead) {
+				Anim.SetTrigger ("demage");
+				immortal = true;
+				StartCoroutine (IndicateImmortality());
+				yield return new WaitForSeconds (immortalTime);
+				immortal = false;
+			} else {
+				Anim.SetLayerWeight (1, 0);
+				Anim.SetTrigger ("die");
+			}
+			yield return null;
+		}
+	}
+
+	#region implemented abstract members of Character
+	public void OnDead()
+	{
+		if (Died != null) {
+			Died ();
+		}
+	}
+	public override bool IsDead {
+		get {
+			if (health <= 0) {
+				OnDead ();
+			}
+			return health <= 0;
+		}
+	}
+
+
+	#region implemented abstract members of Character
+
+	public override void Dead()
+	{
+		Rgb.velocity = Vector2.zero;
+		Anim.SetTrigger ("idle");
+		health = 30;
+		transform.position = startPos;
+	}
+
+	#endregion
+	#endregion
+	#endregion
 }
 
 
