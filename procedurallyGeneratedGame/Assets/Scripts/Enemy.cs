@@ -7,6 +7,7 @@ public class Enemy : Character {
 	public GameObject Target{ get; set;}
 	private IEnemyState currentState;
 
+	private Canvas hpCanvas;
 	private float meleeRange = 2;
 	private float shootRange = 6;
 	public bool InMeleeRange
@@ -35,7 +36,7 @@ public class Enemy : Character {
 		base.Start();
 		PlayerMovement.Instance.Died +=new DeadEventHandler (RemoveTarget);
 		ChangeState (new IdleState());
-
+		hpCanvas = transform.GetComponentInChildren<Canvas> ();
 
 	}
 	
@@ -90,16 +91,40 @@ public class Enemy : Character {
 	}
 
 	#region implemented abstract members of Character
+	public override void DirectionChange()
+	{
+		//Makes a reference to the enemys canvas
+		Transform tmp = transform.Find("EnemyHealthCanvas").transform;
 
+		//Stores the position, so that we know where to move it after we have flipped the enemy
+		Vector3 pos = tmp.position;
+
+		///Removes the canvas from the enemy, so that the health bar doesn't flip with it
+		tmp.SetParent(null);
+
+		///Changes the enemys direction
+		base.DirectionChange();
+
+		//Puts the health bar back on the enemy.
+		tmp.SetParent(transform);
+
+		//Pits the health bar back in the correct position.
+		tmp.position = pos;
+	}
 	public override IEnumerator TakeDemage ()
 	{
+		if (!hpCanvas.isActiveAndEnabled) {
+			hpCanvas.enabled = true;
+		}
 
-			health -= 10;
+		healthStat.CurrentValue -= 10;
 
 			if (!IsDead) {
 				Anim.SetTrigger ("demage");
 				
 			} else {
+			Instantiate (LevelManager.Instance.CoinPrfb, new Vector3 (gameObject.transform.position.x, gameObject.transform.position.y + 2), Quaternion.identity);
+				
 				Anim.SetTrigger ("die");
 				yield return null;
 			}
@@ -112,7 +137,7 @@ public class Enemy : Character {
 
 	public override bool IsDead {
 		get {
-			return health <= 0;
+			return healthStat.CurrentValue <= 0;
 		}
 	}
 
@@ -122,6 +147,7 @@ public class Enemy : Character {
 	public override void Dead ()
 	{
 		Anim.ResetTrigger ("die");
+		hpCanvas.enabled = false;
 		GameObject.Destroy (gameObject);
 	}
 

@@ -12,10 +12,13 @@ public abstract class Character : MonoBehaviour {
 	private EdgeCollider2D weaponCollider;
 	public List<string> demageSource;
 	public Vector3 startPos;
-	[SerializeField]
-	protected float health;
+
 	public abstract bool IsDead{ get; }
 	public abstract void Dead ();
+
+	[SerializeField]
+	protected PlayerStats healthStat;
+
 	public EdgeCollider2D WeaponCollider {
 		get {
 			return weaponCollider;
@@ -29,6 +32,7 @@ public abstract class Character : MonoBehaviour {
 	public virtual void Start () {
 		startPos = transform.position;
 		Anim = GetComponent<Animator> ();
+		healthStat.GiveValues ();
 	}
 	
 	// Update is called once per frame
@@ -43,7 +47,7 @@ public abstract class Character : MonoBehaviour {
 			StartCoroutine (TakeDemage ());
 		}
 	}
-	public void DirectionChange(){
+	public  virtual void DirectionChange(){
 		facingRight = !facingRight;
 		transform.localScale = new Vector3 (transform.localScale.x * -1, 1, 1);
 	}

@@ -27,6 +27,8 @@ public class PlayerMovement : Character {
 	public LayerMask groundOverlapMasks;
 	public float radiusOverlaps;
 
+
+
 	public float jumpForce;
 
 	public Rigidbody2D Rgb{ get; set;}
@@ -38,6 +40,7 @@ public class PlayerMovement : Character {
 		base.Start ();
 		Rgb = GetComponent<Rigidbody2D> ();
 		spriteR = GetComponent<SpriteRenderer> ();
+
 
 	}
 
@@ -57,6 +60,12 @@ public class PlayerMovement : Character {
 
 			LayersHandling ();
 
+		}
+	}
+	public void OnCollisionEnter2D(Collision2D other){
+		if (other.gameObject.tag == "Coin") {
+			LevelManager.Instance.AmountOfCoin++;
+			Destroy (other.gameObject);
 		}
 	}
 
@@ -134,7 +143,7 @@ public class PlayerMovement : Character {
 	{
 		
 		if (!immortal) {
-			health -= 10;
+			healthStat.CurrentValue -= 10;
 			if (!IsDead) {
 				Anim.SetTrigger ("demage");
 				immortal = true;
@@ -158,10 +167,10 @@ public class PlayerMovement : Character {
 	}
 	public override bool IsDead {
 		get {
-			if (health <= 0) {
+			if (healthStat.CurrentValue <= 0) {
 				OnDead ();
 			}
-			return health <= 0;
+			return healthStat.CurrentValue <= 0;
 		}
 	}
 
@@ -172,7 +181,7 @@ public class PlayerMovement : Character {
 	{
 		Rgb.velocity = Vector2.zero;
 		Anim.SetTrigger ("idle");
-		health = 30;
+		healthStat.CurrentValue = healthStat.MaximumValue;
 		transform.position = startPos;
 	}
 

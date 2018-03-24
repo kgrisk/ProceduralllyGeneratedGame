@@ -14,6 +14,7 @@ public class DyingBehaviour : StateMachineBehaviour {
 	override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex) {
 		deathTimer += Time.deltaTime;
 		if (deathTimer >= timeOfRespawn) {
+			deathTimer = 0;
 			animator.GetComponent<Character> ().Dead ();
 		}
 	}

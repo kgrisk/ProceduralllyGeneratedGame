@@ -17,6 +17,7 @@ TagManager:
   - MeleeWeapon
   - EnemyMeleeWeapon
   - Enemy
+  - Coin
   layers:
   - Default
   - TransparentFX

@@ -1,12 +1,16 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj" RefactoringSettings.EnableRefactorings="True">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Sprites\Rooms\threeExits\RoomGeneratorius.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Enemy.cs">
     <Files>
-      <File FileName="Assets\Scripts\CameraFollow.cs" Line="52" Column="29" />
-      <File FileName="Assets\RoomDesignSelection.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\AnimationBehaviours\JumpBehaviour.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\AnimationBehaviours\WolfBehaviour.cs" Line="101" Column="14" />
-      <File FileName="Assets\Sprites\Rooms\threeExits\RoomGeneratorius.cs" Line="8" Column="3" />
+      <File FileName="Assets\2D Sci Fi Game Characters - Slim Version\baroscriptai\HealthBar.cs" Line="15" Column="27" />
+      <File FileName="Assets\2D Sci Fi Game Characters - Slim Version\baroscriptai\PlayerStats.cs" Line="23" Column="1" />
+      <File FileName="Assets\Scripts\PlayerMovement.cs" Line="67" Column="1" />
+      <File FileName="Assets\Character.cs" Line="50" Column="38" />
+      <File FileName="Assets\Scripts\Enemy.cs" Line="118" Column="4" />
+      <File FileName="Assets\Scripts\LevelManager.cs" Line="22" Column="38" />
+      <File FileName="Assets\DyingBehaviour.cs" Line="17" Column="19" />
+      <File FileName="Assets\IgnoreCollisionOfTag.cs" Line="12" Column="4" />
+      <File FileName="Assets\Scripts\IgnoreCollision.cs" Line="6" Column="2" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
